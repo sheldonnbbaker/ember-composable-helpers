@@ -17,7 +17,14 @@ const groupFunction = function() {
   let groups = emberObject.create();
 
   array.forEach((item) => {
-    let groupName = get(item, byPath);
+    let groupName;
+
+    if (typeof byPath === 'function') {
+      groupName = byPath(item);
+    } else {
+      groupName = get(item, byPath);
+    }
+
     let group = get(groups, groupName);
 
     if (!isEmberArray(group)) {
@@ -43,7 +50,11 @@ export default Helper.extend({
     let byPath = get(this, 'byPath');
 
     if (byPath) {
-      defineProperty(this, 'content', computed(`array.@each.${byPath}`, groupFunction));
+      if (typeof byPath === 'function') {
+        defineProperty(this, 'content', computed(`array.@each`, groupFunction));
+      } else {
+        defineProperty(this, 'content', computed(`array.@each.${byPath}`, groupFunction));
+      }
     } else {
       defineProperty(this, 'content', null);
     }
